@@ -24,6 +24,7 @@ do
 	case $option in
 		g)
 			error=0
+			gov=0
 			echo -n "New governor: "
 			read gov
 			echo -n "Setting new governor..."
@@ -44,6 +45,7 @@ do
 		;;
 		f)
 			error=0
+			freq=0
 			echo -n "Frequency in KHz: "
 			read freq
 			echo -n "Setting frequency to $freq..."
@@ -62,11 +64,51 @@ do
 				echo -e "[\033[0;41mERROR\033[0m]"
 			fi
 		;;
+		c)
+			cpu=0
+			state=2
+			echo -n "Number of the cpu: "
+			read cpu
+			echo -n "1- on 0-off: "
+			read state
+
+			if [ $state = 0 ];
+			then
+				echo -n "Turning off cpu$cpu..."
+			elif [ $state = 1 ];
+			then
+				echo -n "Turning on cpu$cpu..."
+			else
+				echo "Option not valid"
+				break
+			fi
+			echo $state >/sys/devices/system/cpu/cpu"$cpu"/online 2>/dev/null
+			if [ $? = 0 ];
+			then
+				echo -e "[\033[0;92mOK\033[0m]"
+			else
+				echo -e "[\033[0;41mERROR\033[0m]"
+			fi
+		;;
 		lg)
 			echo `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors`
 		;;
 		lf)
 			echo `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies`
+		;;
+		lc)
+			for file in `ls /sys/devices/system/cpu/cpu*/online`
+			do
+				online=`cat $file`
+				dirn=`dirname $file`
+				echo -n `basename $dirn`
+				if [ $online = 1 ];
+				then
+					echo -e "[\033[0;92mONLINE\033[0m]"
+				else
+					echo -e "[\033[0;41mOFFLINE\033[0m]"
+				fi
+			done
 		;;
 		cg)
 			echo `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
@@ -75,8 +117,8 @@ do
 			echo `cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq`
 		;;
 		h)
-			echo -e "g - change governor\nf - change frequency\nlg - list governors\nlf - list availables frequencies"
-			echo -e "cg - current governor\ncf - current frequency\nh - help\nq - exit"
+			echo -e "g - change governor\nf - change frequency\nc - enabling or disabling cores\nlg - list governors\nlf - list availables frequencies"
+			echo -e "lc - list core states\ncg - current governor\ncf - current frequency\nh - help\nq - exit"
 		;;
 		q)
 			break
