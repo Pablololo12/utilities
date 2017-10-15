@@ -57,9 +57,6 @@ done
 
 echo Controls:
 echo space: play/pause
-echo 9: vol-
-echo 0: vol+
-echo m: mute
 echo arrows to advance
 echo q: quit song and play the next one
 echo 
