@@ -83,12 +83,6 @@ def compare_images(image1, image2):
 	return acum
 
 def compare_images_box(image1, image2, x1, y1, x2, y2):
-	acum = 0
-	#for i in range(x1, x2+1):
-	#	for d in range(y1, y2+1):
-	#		#tmp = np.sum(image1[d,i].astype("float")-image2[d,i].astype("float"))
-	#		#acum = acum + tmp * tmp
-	#		acum = acum + abs(image1[d,i,0]-image2[d,i,0]) + abs(image1[d,i,1]-image2[d,i,1]) + abs(image1[d,i,2]-image2[d,i,2])
 	acum = np.sum((image1[y1:y2+1,x1:x2+1].astype("float") - image2[y1:y2+1,x1:x2+1].astype("float")) ** 2)
 	return acum
 
