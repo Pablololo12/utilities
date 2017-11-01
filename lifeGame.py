@@ -9,9 +9,9 @@ import random
 import getopt
 from pygame.locals import *
 
-width = 200
-heidth = 200
-tileSize = 2
+width = 100
+heidth = 100
+tileSize = 5
 time_millis = 100
 
 colours = {

@@ -6,7 +6,6 @@ import sys
 import getopt
 import numpy as np
 import cv2
-from sklearn.cluster import KMeans
 
 threshold = 140.0
 average = 0
