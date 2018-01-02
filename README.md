@@ -2,7 +2,7 @@
 
 Different useful utilities that i use in my everyday.
 
-* cpu-tuner.sh allows you to change the governor and frequency of your computer
+* [cpu-tuner.sh](cpu_tuner.sh) allows you to change the governor and frequency of your computer
 * [imgSketch.py](imgSketch.py) a script to solve the challenge from 4chan.org/wpc
 ```
 - load an image (source image)
@@ -17,3 +17,5 @@ Different useful utilities that i use in my everyday.
 * [playsomemusic.sh](playsomemusic.sh) A youtube playlist player in shell
 * [lifeGame.py](lifeGame.py) An interactive version of the Conway's Game of Life made with python
 * [palette.py](palette.py) Uses only five colors to print an image, use -k for better output
+* [mandelbrot.c](mandelbrot.c) A simple C program that draws a Mandelbrot
+* [game.py](game/game.py) Simple Asteroids game
