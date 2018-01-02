@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+# Author: pabloheralm@gmail.com
+#         @pablololo12
 
 import pygame
 from pygame.locals import *
@@ -10,8 +11,10 @@ import random
 class Asteroids:
 
 	def __init__(self):
-		self.w=640
-		self.h=480
+		#self.w=640
+		#self.h=480
+		self.w=1200
+		self.h=700
 		self.WHITE=(255,255,255)
 		self.BLACK=(0,0,0)
 		self.size=(self.w,self.h)
@@ -35,7 +38,7 @@ class Asteroids:
 
 		pygame.init()
 		self.font = pygame.font.SysFont(pygame.font.get_default_font(),50,bold=True)
-		self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE)
+		self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE|pygame.RESIZABLE)
 
 	def event(self, event):
 		if event.type == QUIT:
@@ -56,6 +59,11 @@ class Asteroids:
 				self.L_P = False
 			if event.key == K_RIGHT:
 				self.R_P = False
+		if event.type==VIDEORESIZE:
+			self.screen=pygame.display.set_mode(event.dict['size'],pygame.HWSURFACE|pygame.RESIZABLE)
+			self.w=event.dict['size'][0]
+			self.h=event.dict['size'][1]
+			self.size=(self.w,self.h)
 
 	def get_pol_ship(self, pos):
 		ship=[]
@@ -96,7 +104,7 @@ class Asteroids:
 		asteroid = [[random.randint(0,self.w),random.randint(0,self.h)]]
 		# Random direction
 		angle = random.uniform(0,2*math.pi)
-		asteroid.append([math.cos(angle),math.sin(angle)])
+		asteroid.append([math.cos(angle)*2,math.sin(angle)*2])
 
 		angles = []
 		for i in range(0,random.randint(5,9)):
@@ -105,7 +113,7 @@ class Asteroids:
 		angles.sort()
 		pos = asteroid[0]
 		for angle in angles:
-			rad = random.randint(20,25)
+			rad = random.randint(25,35)
 			asteroid.append([pos[0]+rad*math.cos(angle),pos[1]+rad*math.sin(angle)])
 
 		return asteroid
