@@ -7,6 +7,8 @@ from pygame.locals import *
 import math
 import random
 
+MIN_ASTEROIDS=25
+MAX_ASTEROIDS=30
 
 class Asteroids:
 
@@ -18,6 +20,7 @@ class Asteroids:
 		self.WHITE=(255,255,255)
 		self.BLACK=(0,0,0)
 		self.size=(self.w,self.h)
+		self.clock = pygame.time.Clock()
 
 		self.exit = False
 		self.collision = False
@@ -26,6 +29,9 @@ class Asteroids:
 		self.L_P = False
 		self.R_P = False
 		self.S_P = False
+		self.pause = False
+		self.reset = False
+		self.spawn = False
 
 		self.poship=[self.w/2,self.h/2,0]
 		self.vel=[0,0]
@@ -52,6 +58,14 @@ class Asteroids:
 				self.R_P = True
 			if event.key == K_SPACE:
 				self.S_P = True
+			if event.key == K_p:
+				self.pause = ~self.pause
+			if event.key == K_r:
+				self.reset = True
+			if event.key == K_q:
+				self.exit = True
+			if event.key == K_s:
+				self.spawn = True
 		if event.type == KEYUP:
 			if event.key == K_UP:
 				self.U_P = False
@@ -59,6 +73,8 @@ class Asteroids:
 				self.L_P = False
 			if event.key == K_RIGHT:
 				self.R_P = False
+			if event.key == K_s:
+				self.spawn = False
 		if event.type==VIDEORESIZE:
 			self.screen=pygame.display.set_mode(event.dict['size'],pygame.HWSURFACE|pygame.RESIZABLE)
 			self.w=event.dict['size'][0]
@@ -104,7 +120,7 @@ class Asteroids:
 		asteroid = [[random.randint(0,self.w),random.randint(0,self.h)]]
 		# Random direction
 		angle = random.uniform(0,2*math.pi)
-		asteroid.append([math.cos(angle)*2,math.sin(angle)*2])
+		asteroid.append([math.cos(angle)/10,math.sin(angle)/10])
 
 		angles = []
 		for i in range(0,random.randint(5,9)):
@@ -144,17 +160,35 @@ class Asteroids:
 		
 
 	def main_loop(self):
-		for i in range(0,random.randint(10,25)):
+		for i in range(0,random.randint(MIN_ASTEROIDS,MAX_ASTEROIDS)):
 			self.asteroids.append(self.get_new_asteroid())
 
 		while not self.exit:
 			for event in pygame.event.get():
 				self.event(event)
 
+			if self.reset:
+				self.poship=[self.w/2,self.h/2,0]
+				self.vel=[0,0]
+				self.asteroids=[]
+				self.reset=False
+				self.collision=False
+				for i in range(0,random.randint(MIN_ASTEROIDS,MAX_ASTEROIDS)):
+					self.asteroids.append(self.get_new_asteroid())
+
+			if self.pause:
+				self.screen.blit(self.font.render("Pause",True,self.WHITE),(self.w/2,self.h/3))
+				pygame.display.flip()
+				continue
+
+			if self.spawn:
+				self.asteroids.append(self.get_new_asteroid())
+				#self.spawn = False
+
 			if self.U_P:
 				direction=[0,0]
-				direction[0] = math.cos(self.poship[2])/3
-				direction[1] = math.sin(self.poship[2])/3
+				direction[0] = math.cos(self.poship[2])/50
+				direction[1] = math.sin(self.poship[2])/50
 				self.vel[0] = self.vel[0] + direction[0]
 				self.vel[1] = self.vel[1] + direction[1]
 			else:
@@ -166,31 +200,29 @@ class Asteroids:
 				self.poship[2] = self.poship[2]+0.08
 			if self.S_P:
 				self.S_P = False
-				shoot=[self.poship[0],self.poship[1],0,0,(self.h+self.w)/15]
-				shoot[2] = math.cos(self.poship[2])*8
-				shoot[3] = math.sin(self.poship[2])*8
+				shoot=[self.poship[0],self.poship[1],0,0]
+				shoot[2] = math.cos(self.poship[2])
+				shoot[3] = math.sin(self.poship[2])
 				self.shoots.append(shoot)
 
 			self.screen.fill(self.BLACK)
 
+			dt = self.clock.get_time()
 			#Update ship position
-			self.poship[0] = self.poship[0] + self.vel[0]
-			self.poship[1] = self.poship[1] + self.vel[1]
+			self.poship[0] = self.poship[0] + self.vel[0]*dt
+			self.poship[1] = self.poship[1] + self.vel[1]*dt
 			#check limits
 			self.poship[0:2],_ = self.check_limits([self.poship[0],self.poship[1]])
 			shippoly = self.get_pol_ship(self.poship)
 
 			#Update shoots pos
 			for shoot in self.shoots:
-				if shoot[4] <= 0:
+				shoot[0] = shoot[0]+shoot[2]*dt
+				shoot[1] = shoot[1]+shoot[3]*dt
+				shoot[0:2],out = self.check_limits([shoot[0],shoot[1]])
+				if out:
 					self.shoots.remove(shoot)
 					continue
-				# In order to disapear shoot
-				shoot[4] = shoot[4]-1
-
-				shoot[0] = shoot[0]+shoot[2]
-				shoot[1] = shoot[1]+shoot[3]
-				shoot[0:2],_ = self.check_limits([shoot[0],shoot[1]])
 				pygame.draw.rect(self.screen,self.WHITE,(shoot[0],shoot[1],2,2))
 
 			#Update asteroid positions
@@ -198,8 +230,8 @@ class Asteroids:
 				astpos = asteroid[0]
 				velast = asteroid[1]
 
-				astpos[0] = astpos[0] + velast[0]
-				astpos[1] = astpos[1] + velast[1]
+				astpos[0] = astpos[0] + velast[0]*dt
+				astpos[1] = astpos[1] + velast[1]*dt
 				astposnew,out = self.check_limits(astpos)
 
 				if out:
@@ -209,8 +241,8 @@ class Asteroids:
 						pos[1] = pos[1]+change[1]
 				else:
 					for pos in asteroid[2:]:
-						pos[0] = pos[0] + velast[0]
-						pos[1] = pos[1] + velast[1]
+						pos[0] = pos[0] + velast[0]*dt
+						pos[1] = pos[1] + velast[1]*dt
 				asteroid[0] = astposnew
 				pygame.draw.polygon(self.screen,self.WHITE,asteroid[2:],2)
 				for shoot in self.shoots:
@@ -224,9 +256,11 @@ class Asteroids:
 			if not self.collision:
 				pygame.draw.polygon(self.screen,self.WHITE,self.get_pol_ship(self.poship))
 			else:
-				self.screen.blit(self.font.render("GAME OVER",True,self.WHITE),(self.w/3,self.h/3))
+				self.screen.blit(self.font.render("GAME OVER",True,self.WHITE),(self.w/2.5,self.h/3))
 			#Update screen
+			self.clock.tick(60)
 			pygame.display.flip()
+			pygame.display.set_caption("fps: " + str(round(self.clock.get_fps())))
 
 def main():
 	game = Asteroids()
