@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Author: pabloheralm@gmail.com
 #         @pablololo12
 
@@ -93,8 +93,8 @@ def main(argv):
 						pause = 1
 						button = pygame.draw.rect(DISPLAY, (255,0,0), ((width*tileSize)/2-10, heidth*tileSize+10, 20,20))
 				else:
-					y = pos[1]/tileSize
-					x = pos[0]/tileSize
+					y = int(pos[1]/tileSize)
+					x = int(pos[0]/tileSize)
 					if y > heidth-1:
 						break
 					if board[x][y] == 0:
