@@ -32,6 +32,7 @@ class Asteroids:
 		self.pause = False
 		self.reset = False
 		self.spawn = False
+		self.mute = False
 
 		self.poship=[self.w/2,self.h/2,0]
 		self.vel=[0,0]
@@ -43,8 +44,10 @@ class Asteroids:
 		random.seed()
 
 		pygame.init()
+		pygame.mixer.init()
 		self.font = pygame.font.SysFont(pygame.font.get_default_font(),50,bold=True)
 		self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE|pygame.RESIZABLE)
+		self.shoot_sound = pygame.mixer.Sound('shoot.wav')
 
 	def event(self, event):
 		if event.type == QUIT:
@@ -66,6 +69,8 @@ class Asteroids:
 				self.exit = True
 			if event.key == K_s:
 				self.spawn = True
+			if event.key == K_m:
+				self.mute = ~self.mute
 		if event.type == KEYUP:
 			if event.key == K_UP:
 				self.U_P = False
@@ -200,6 +205,8 @@ class Asteroids:
 				self.poship[2] = self.poship[2]+0.08
 			if self.S_P:
 				self.S_P = False
+				if not self.mute:
+					self.shoot_sound.play()
 				shoot=[self.poship[0],self.poship[1],0,0]
 				shoot[2] = math.cos(self.poship[2])
 				shoot[3] = math.sin(self.poship[2])
